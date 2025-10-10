@@ -80,8 +80,6 @@ public class PaymentService(IPaymentRepository paymentRepository, IReservationRe
                 IsPaid = paymentRequestDto.IsPaid
             };
 
-            _logger.LogInformation("Creating payment with ID: {PaymentId}, Reservation ID: {ReservationId}, PaymentMethodId: {PaymentMethodId}", paymentEntity.Id, paymentEntity.ReservationId, paymentEntity.PaymentMethodId);
-
             var addResult = await _paymentRepository.AddAsync(paymentEntity);
             if (!addResult.Succeeded)
                 return new ApiResponse<CreatePaymentResponseDto> { Succeeded = false, StatusCode = 500, Message = "Payment could not be created", Result = null };
@@ -102,7 +100,6 @@ public class PaymentService(IPaymentRepository paymentRepository, IReservationRe
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred while creating payment: {Message}", ex.Message);
             return new ApiResponse<CreatePaymentResponseDto> { Succeeded = false, StatusCode = 500, Message = ex.Message, Result = null };
         }
     }

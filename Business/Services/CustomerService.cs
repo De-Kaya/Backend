@@ -4,7 +4,6 @@ using Data.Entities;
 using Data.Interfaces;
 using Data.Models;
 using Domain.Dtos;
-using System.Linq.Expressions;
 
 namespace Business.Services;
 
@@ -140,8 +139,7 @@ public class CustomerService(ICustomerRepository customerRepository, IReservatio
                 }
 
                 //Müşteriyi sil
-                var customerEntity = _mapper.Map<CustomerEntity>(customerResult.Result);
-                var deleteResult = await _customerRepository.DeleteAsync(customerEntity);
+                var deleteResult = await _customerRepository.DeleteByIdAsync(customerId);
                 if (!deleteResult.Succeeded)
                 {
                     await _customerRepository.RollbackTransactionAsync();

@@ -11,28 +11,28 @@ namespace Data.Repositories;
 public class CustomerRepository(DataContext context, IMapper mapper) : BaseRepository<CustomerEntity, CustomerDto>(context, mapper), ICustomerRepository
 {
     //Müşteri sayısını getirir
-    public Task<ApiResponse<int>> GetCustomerCountAsync()
+    public async Task<ApiResponse<int>> GetCustomerCountAsync()
     {
         try
         {
-            var count = _table.CountAsync();
-            return count.ContinueWith(t => new ApiResponse<int>
+            var count = await _table.CountAsync();
+            return new ApiResponse<int>
             {
                 Succeeded = true,
                 StatusCode = 200,
-                Message = t.Result > 0 ? "Customer count retrieved successfully" : "No customers found",
-                Result = t.Result
-            });
+                Message = count > 0 ? "Customer count retrieved successfully" : "No customers found",
+                Result = count
+            };
         }
         catch (Exception ex)
         {
-          return Task.FromResult(new ApiResponse<int>
-          {
-              Succeeded = false,
-              StatusCode = 500,
-              Message = ex.Message,
-              Result = 0
-          });
+            return new ApiResponse<int>
+            {
+                Succeeded = false,
+                StatusCode = 500,
+                Message = ex.Message,
+                Result = 0
+            };
         }
     }
 
@@ -74,7 +74,7 @@ public class CustomerRepository(DataContext context, IMapper mapper) : BaseRepos
                 .Select(c => new
                 {
                     Customer = c,
-                    Balance = c.CustomerBalances.Sum(b => b.TransactionType == TransactionType.Debt || b.TransactionType == TransactionType.Refund
+                    Balance = c.CustomerBalances.Sum(b => b.TransactionType == TransactionType.Debt
                         ? b.Amount
                         : -b.Amount)
                 })

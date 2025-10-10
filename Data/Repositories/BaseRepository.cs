@@ -185,8 +185,26 @@ public abstract class BaseRepository<TEntity, TModel> : IBaseRepository<TEntity,
     {
         try
         {
-            if (entity == null)
+           if (entity == null)
                 return new ApiResponse<bool> { Succeeded = false, StatusCode = 400, Message = "Entity cannot be null", Result = false };
+
+            _table.Remove(entity);
+            await _context.SaveChangesAsync();
+            return new ApiResponse<bool> { Succeeded = true, StatusCode = 200, Message = "Entity deleted successfully", Result = true };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<bool> { Succeeded = false, StatusCode = 500, Message = ex.Message, Result = false };
+        }
+    }
+
+    public virtual async Task<ApiResponse<bool>> DeleteByIdAsync(string id)
+    {
+        try
+        {
+            var entity = await _table.FindAsync(id);
+            if (entity == null)
+                return new ApiResponse<bool> { Succeeded = false, StatusCode = 404, Message = "Entity not found", Result = false };
             _table.Remove(entity);
             await _context.SaveChangesAsync();
             return new ApiResponse<bool> { Succeeded = true, StatusCode = 200, Message = "Entity deleted successfully", Result = true };

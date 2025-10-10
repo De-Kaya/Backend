@@ -12,6 +12,7 @@ namespace Data.Interfaces
         Task CommitTransactionAsync();
         Task<ApiResponse<bool>> AddAsync(TEntity entity);
         Task<ApiResponse<bool>> DeleteAsync(TEntity entity);
+        Task<ApiResponse<bool>> DeleteByIdAsync(string id);
         Task<ApiResponse<bool>> UpdateAsync(TEntity entity);
         Task<ApiResponse<TModel>> GetAsync(Expression<Func<TEntity, bool>> where, params Expression<Func<TEntity, object>>[] includes);
         Task<ApiResponse<IEnumerable<TModel>>> GetAllAsync(bool orderByDescending = false, Expression<Func<TEntity, object>>? sortBy = null, Expression<Func<TEntity, bool>>? where = null, params Expression<Func<TEntity, object>>[] includes);

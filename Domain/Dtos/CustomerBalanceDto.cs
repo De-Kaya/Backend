@@ -15,7 +15,7 @@ public class CustomerBalanceDto
 
 public enum TransactionType
 {
-    Debt,      // Borç: Rezervasyon veya kiralama maliyeti (bakiyeyi artırır, yani negatif etki).
-    Payment,   // Ödeme: Müşterinin yaptığı ödeme (bakiyeyi azaltır, yani pozitif etki).
-    Refund     // İade: Müşteriye yapılan geri ödeme (bakiyeyi artırır, yani negatif etki, örneğin rezervasyon iptali durumunda).
+    Debt,      // Borç: Müşteri tarafından ödenecek tutar (bakiyeyi artırır)
+    Payment,   // Ödeme: Müşterinin yaptığı ödeme (bakiyeyi azaltır)
+    Refund     // İade: Müşteriye yapılan geri ödeme (bakiyeyi azaltır)
 }
