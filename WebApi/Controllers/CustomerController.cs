@@ -19,8 +19,9 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
 
         var result = await _customerService.CreateCustomerAsync(customerDto);
         if (!result.Succeeded)
-            return StatusCode(result.StatusCode, new { result.Message });
-        return StatusCode(result.StatusCode, result.Result);
+            return StatusCode(result.StatusCode == 0 ? 400 : result.StatusCode, new { result.Message });
+        
+        return CreatedAtAction(nameof(GetCustomerById), new { id = result.Result!.Id }, result.Result);
     }
 
     [HttpPut("{id}")]
