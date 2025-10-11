@@ -316,4 +316,25 @@ public class CustomerService(ICustomerRepository customerRepository, IReservatio
             return new ApiResponse<int> { Succeeded = false, Message = $"An error occurred while retrieving reservation count: {ex.Message}", Result = 0 };
         }
     }
+
+    public async Task<ApiResponse<PageResult<CustomerDto>>> GetCustomersPagedAsync(int page, int pageSize, string? search)
+    {
+        try
+        {
+            if (pageSize > 100) pageSize = 100;
+
+            var repoResult = await _customerRepository.GetPagedAsync(page, pageSize, search);
+            return new ApiResponse<PageResult<CustomerDto>>
+            {
+                Succeeded = repoResult.Succeeded,
+                StatusCode = repoResult.Succeeded ? 200 : 500,
+                Message = repoResult.Succeeded ? "Paged customers retrieved successfully." : "Failed to retrieve paged customers.",
+                Result = repoResult.Result
+            };
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<PageResult<CustomerDto>> { Succeeded = false, Message = $"An error occurred while retrieving paged customers: {ex.Message}", Result = null };
+        }
+    }
 }

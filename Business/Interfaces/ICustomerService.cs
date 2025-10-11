@@ -15,5 +15,5 @@ public interface ICustomerService
     Task<ApiResponse<int>> GetCustomerCountAsync();
     Task<ApiResponse<int>> GetReservationCountAsync(string customerId);
     Task<ApiResponse<IEnumerable<CustomerDto>>> GetCustomersWithOverdueBalanceAsync();
-
+    Task<ApiResponse<PageResult<CustomerDto>>> GetCustomersPagedAsync(int page, int pageSize, string? search);
 }

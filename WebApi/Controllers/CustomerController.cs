@@ -108,4 +108,13 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
             return StatusCode(result.StatusCode, new { result.Message });
         return Ok(result.Result);
     }
+
+    [HttpGet]
+    public async Task<IActionResult> GetCustomersPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? search = null)
+    {
+        var result = await _customerService.GetCustomersPagedAsync(page, pageSize, search);
+        if (!result.Succeeded)
+            return StatusCode(result.StatusCode, new { result.Message });
+        return Ok(result.Result);
+    }
 }

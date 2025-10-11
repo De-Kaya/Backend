@@ -102,4 +102,61 @@ public class CustomerRepository(DataContext context, IMapper mapper) : BaseRepos
             };
         }
     }
+
+    public async Task<ApiResponse<PageResult<CustomerDto>>> GetPagedAsync(int page, int pageSize, string? search)
+    {
+        try
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 20;
+            if (pageSize > 100) pageSize = 100;
+
+            IQueryable<CustomerEntity> query = _table.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var s = search.Trim().ToLower();
+                query = query.Where(c =>
+                    (c.FullName != null && c.FullName.ToLower().Contains(s)) ||
+                    (c.Email != null && c.Email.ToLower().Contains(s)));
+            }
+
+            query = query.OrderByDescending(c => c.CreatedAt);
+            var total = await query.CountAsync();
+
+            var entities = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+            var items = _mapper.Map<IEnumerable<CustomerDto>>(entities);
+
+            var result = new PageResult<CustomerDto>
+            {
+                Items = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = total
+            };
+
+            return new ApiResponse<PageResult<CustomerDto>>
+            {
+                Succeeded = true,
+                StatusCode = 200,
+                Message = "Customers paged successfully",
+                Result = result
+            };
+
+        }
+        catch (Exception ex)
+        {
+            return new ApiResponse<PageResult<CustomerDto>>
+            {
+                Succeeded = false,
+                StatusCode = 500,
+                Message = ex.Message,
+                Result = null
+            };
+        }
+    }
 }
