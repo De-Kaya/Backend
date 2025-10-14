@@ -151,7 +151,7 @@ public class CustomerService(ICustomerRepository customerRepository, IReservatio
                 {
                     foreach (var balance in balances.Result!)
                     {
-                       var balanceDeleteResult = await _customerBalanceRepository.DeleteAsync(_mapper.Map<CustomerBalanceEntity>(balance));
+                       var balanceDeleteResult = await _customerBalanceRepository.DeleteByIdAsync(balance.Id);
                        if (!balanceDeleteResult.Succeeded)
                        {
                            await _customerRepository.RollbackTransactionAsync();
