@@ -206,7 +206,10 @@ public class CustomerService(ICustomerRepository customerRepository, IReservatio
     {
         try
         {
-            var result = await _customerRepository.GetAllAsync();
+            var result = await _customerRepository.GetAllAsync(
+                orderByDescending: true,
+                sortBy: (CustomerEntity c) => c.CreatedAt
+                );
             return new ApiResponse<IEnumerable<CustomerDto>>
             {
                 Succeeded = result.Succeeded,
