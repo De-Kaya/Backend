@@ -32,8 +32,9 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
 
         var result = await _customerService.UpdateCustomerAsync(customerDto);
         if (!result.Succeeded)
-            return StatusCode(result.StatusCode, new { result.Message });
-        return StatusCode(result.StatusCode, result.Result);
+            return StatusCode(result.StatusCode == 0 ? 400 : result.StatusCode, new { result.Message });
+
+        return Ok(new { Message = "Customer updated successfully.", Customer = result.Result });
     }
 
 
@@ -43,7 +44,7 @@ public class CustomerController(ICustomerService customerService) : ControllerBa
         var result = await _customerService.DeleteCustomerAsync(id);
         if (!result.Succeeded)
             return StatusCode(result.StatusCode, new { result.Message });
-        return StatusCode(result.StatusCode, new { result.Message });
+        return Ok(new { Message = "Customer deleted successfully." });
     }
 
     [HttpGet("{id}")]

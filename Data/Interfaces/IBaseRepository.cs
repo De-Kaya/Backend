@@ -18,5 +18,6 @@ namespace Data.Interfaces
         Task<ApiResponse<IEnumerable<TModel>>> GetAllAsync(bool orderByDescending = false, Expression<Func<TEntity, object>>? sortBy = null, Expression<Func<TEntity, bool>>? where = null, params Expression<Func<TEntity, object>>[] includes);
         Task<ApiResponse<IEnumerable<TSelect>>> GetAllAsync<TSelect>(Expression<Func<TEntity, TSelect>> selector, bool orderByDescending = false, Expression<Func<TEntity, object>>? sortBy = null, Expression<Func<TEntity, bool>>? where = null, params Expression<Func<TEntity, object>>[] includes);
         Task<ApiResponse<bool>> ExistsAsync(Expression<Func<TEntity, bool>> findBy);
+        Task<TEntity?> FindByIdAsync(string id);
     }
 }

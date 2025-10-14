@@ -58,41 +58,63 @@ public class CustomerService(ICustomerRepository customerRepository, IReservatio
     {
         try
         {
-            // Zorunlu alan kontrolü
+            await _customerRepository.BeginTransactionAsync();
+            //Zorunlu alan kontrollu
+            if (string.IsNullOrEmpty(customerDto.Id))
+                return new ApiResponse<CustomerDto> { Succeeded = false, Message = "Customer ID is required.", Result = null };
+
+            //Zorunlu alan kontrollu
             if (string.IsNullOrEmpty(customerDto.FullName))
-                return new ApiResponse<CustomerDto> { Succeeded = false, StatusCode = 400, Message = "Full name is required", Result = null };
+                return new ApiResponse<CustomerDto> { Succeeded = false, Message = "Fullname is required.", Result = null };
 
-            // Müşteri kontrolü
-            var existingCustomer = await _customerRepository.GetAsync(c => c.Id == customerDto.Id);
-            if (!existingCustomer.Succeeded || existingCustomer.Result == null)
-                return new ApiResponse<CustomerDto> { Succeeded = false, StatusCode = 404, Message = "Customer not found", Result = null };
+            //Müşteri kontrolü
+            var existingCustomerResult = await _customerRepository.GetAsync(c => c.Id == customerDto.Id);
+            if (!existingCustomerResult.Succeeded || existingCustomerResult.Result == null)
+                return new ApiResponse<CustomerDto> { Succeeded = false, Message = "Customer not found.", Result = null };
 
-            // E-posta veya telefon benzersizlik kontrolü
-            if (!string.IsNullOrEmpty(customerDto.Email))
+            //E-posta veya telefon numarasinin benzersiz olmasi kontrolu
+            if (!string.IsNullOrWhiteSpace(customerDto.Email)) 
             {
                 var emailCheck = await _customerRepository.GetAsync(c => c.Email == customerDto.Email && c.Id != customerDto.Id);
                 if (emailCheck.Succeeded && emailCheck.Result != null)
-                    return new ApiResponse<CustomerDto> { Succeeded = false, StatusCode = 400, Message = "Bu mail adresi başka bir müşteri için kullanıldı.", Result = null };
+                    return new ApiResponse<CustomerDto> { Succeeded = false, Message = "A customer with the same email already exists.", Result = null };
             }
-            if (!string.IsNullOrEmpty(customerDto.PhoneNumber))
+
+            if (!string.IsNullOrWhiteSpace(customerDto.PhoneNumber))
             {
                 var phoneCheck = await _customerRepository.GetAsync(c => c.PhoneNumber == customerDto.PhoneNumber && c.Id != customerDto.Id);
                 if (phoneCheck.Succeeded && phoneCheck.Result != null)
-                    return new ApiResponse<CustomerDto> { Succeeded = false, StatusCode = 400, Message = "Bu telefon numarası başka bir müşteri için kullanıldı.", Result = null };
+                    return new ApiResponse<CustomerDto> { Succeeded = false, Message = "A customer with the same phone number already exists.", Result = null };
             }
 
-            //Müşteriyi güncelle
-            var customerEntity = _mapper.Map<CustomerEntity>(customerDto);
-            customerEntity.CreatedAt = existingCustomer.Result.CreatedAt;
-            var updateResult = await _customerRepository.UpdateAsync(customerEntity);
-            if (!updateResult.Succeeded)
-                return new ApiResponse<CustomerDto> { Succeeded = false, StatusCode = 500, Message = "Failed to update customer", Result = null };
+            //Entity DB'den çek
+            var existingEntity = await _customerRepository.FindByIdAsync(customerDto.Id);
+            if (existingEntity == null)
+                return new ApiResponse<CustomerDto> { Succeeded = false, Message = "Customer not found.", Result = null };
 
-            var resultDto = _mapper.Map<CustomerDto>(customerEntity);
-            return new ApiResponse<CustomerDto> { Succeeded = true, StatusCode = 200, Message = "Customer updated successfully", Result = resultDto };
+            //Korunacak alanları koru
+            var createdAt = existingEntity.CreatedAt;
+
+            //DTO'yu mevcut entitynin üzerine map et
+            _mapper.Map(customerDto, existingEntity);
+
+            //Korunacak alanları geri yükle
+            existingEntity.CreatedAt = createdAt;
+
+            //Güncelle
+            var updateResult = await _customerRepository.UpdateAsync(existingEntity);
+            if (!updateResult.Succeeded)
+                return new ApiResponse<CustomerDto> { Succeeded = false, StatusCode = 500, Message = "Failed to update customer.", Result = null };
+
+            var resultDto = _mapper.Map<CustomerDto>(existingEntity);
+            await _customerRepository.CommitTransactionAsync();
+            return new ApiResponse<CustomerDto> { Succeeded = true, StatusCode = 200, Message = "Customer updated successfully.", Result = resultDto };
+            
+
         }
         catch (Exception ex)
         {
+            await _customerRepository.RollbackTransactionAsync();
             return new ApiResponse<CustomerDto> { Succeeded = false, Message = $"An error occurred while updating the customer, {ex.Message}", Result = null };
         }
     }

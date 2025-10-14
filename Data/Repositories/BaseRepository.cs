@@ -72,7 +72,7 @@ public abstract class BaseRepository<TEntity, TModel> : IBaseRepository<TEntity,
     {
         try
         {
-            IQueryable<TEntity> query = _table;
+            IQueryable<TEntity> query = _table.AsNoTracking();
 
             if (where != null)
                 query = query.Where(where);
@@ -101,7 +101,7 @@ public abstract class BaseRepository<TEntity, TModel> : IBaseRepository<TEntity,
     {
         try
         {
-            IQueryable<TEntity> query = _table;
+            IQueryable<TEntity> query = _table.AsNoTracking();
             if (where != null)
                 query = query.Where(where);
 
@@ -130,7 +130,7 @@ public abstract class BaseRepository<TEntity, TModel> : IBaseRepository<TEntity,
             if (where == null)
                 return new ApiResponse<TModel> { Succeeded = false, StatusCode = 400, Message = "Where clause cannot be null", Result = null };
 
-            IQueryable<TEntity> query = _table;
+            IQueryable<TEntity> query = _table.AsNoTracking();
             if (includes != null && includes.Length > 0)
                 foreach (var include in includes)
                     query = query.Include(include);
@@ -213,5 +213,11 @@ public abstract class BaseRepository<TEntity, TModel> : IBaseRepository<TEntity,
         {
             return new ApiResponse<bool> { Succeeded = false, StatusCode = 500, Message = ex.Message, Result = false };
         }
+    }
+
+    //Generic bir çözüm. Test için ekledim.
+    public virtual async Task<TEntity?> FindByIdAsync(string id)
+    {
+        return await _table.FindAsync(id);
     }
 }

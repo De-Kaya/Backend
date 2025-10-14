@@ -40,7 +40,6 @@ public class MappingProfile : Profile
             .ForMember(dest => dest.TransactionType, opt => opt.MapFrom(src => src.TransactionType.ToString()))
             .ForMember(dest => dest.CustomerFullName, opt => opt.MapFrom(src => src.Customer != null ? src.Customer.FullName : null));
         CreateMap<CustomerBalanceDto, CustomerBalanceEntity>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id ?? Guid.NewGuid().ToString()))
             .ForMember(dest => dest.Reservation, opt => opt.Ignore())
             .ForMember(dest => dest.Payment, opt => opt.Ignore())
             .ForMember(dest => dest.Customer, opt => opt.Ignore());
